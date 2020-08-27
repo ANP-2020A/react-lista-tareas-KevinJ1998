@@ -1,62 +1,43 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import TodoList from './TodoList';
 
 const UserList = () => {
-  const initialUsers = () => {
-    console.log( 'inicializando estado' );
-    return [
-      {
-        name: 'Kevin',
-        lastName: 'Segovia'
-      },
-      {
-        name: 'Nicole',
-        lastName: 'Zambrano'
-      },
-      {
-        name: 'Luis',
-        lastName: 'Pazmiño'
-      }
-    ];
-  };
 
-  const [ users, setUsers ] = useState( () => initialUsers() );
-  const [ count, setCount ] = useState( 0 );
+  const [ user, setUser ] = useState( {} );
+  const [ countUsers, setCountUsers ] = useState( 1 );
+  const [ tasks, setTasks ] = useState( [] );
 
-  const handleAddUser = () => {
-    const name = document.querySelector( '#name' ).value;
-    const lastName = document.querySelector( '#lastname' ).value;
-    const newUser = {
-      name,
-      lastName
-    };
-    setUsers( ( prevState ) => [
-      ...prevState,
-      newUser
-    ] );
-  };
+  useEffect( () => {
+    fetch( `https://jsonplaceholder.typicode.com/users/${ countUsers }` ).then( ( data ) => {
+      return data.json();
+    } ).then( ( json ) => {
+      console.log( 'json', json );
+      setUser( () => json );
+    } );
+    fetch( `https://jsonplaceholder.typicode.com/users/${ countUsers }/todos` ).then( ( data ) => {
+      return data.json();
+    } ).then( ( json ) => {
+      console.log( 'json', json );
+      setTasks( () => json );
+    } );
+  }, [ countUsers ] );
+
 
   return (
     <div>
       <div>
-        { count }
-        <button onClick={ () => {setCount( count + 1 );} }>Sumar</button>
-        <button onClick={ () => {setCount( 0 );} }>Resetear</button>
-        <br/>
-        <label htmlFor='name'>Nombre</label>
-        <input type='text' id='name' />
-
-        <label htmlFor='lastname'>Apellido</label>
-        <input type='text' id='lastname' />
-
-        <button onClick={ handleAddUser }>Agregar Usuario</button>
+        <button onClick={ () => setCountUsers( countUsers - 1 ) } hidden={ countUsers === 1 }>Anterior Usuario</button>
+        <button onClick={ () => setCountUsers( countUsers + 1 ) } hidden={ countUsers >= 10 }>Siguiente Usuario</button>
       </div>
+      <h1>Información del usuario</h1>
       <ul>
-        {
-          users.map( ( user, index ) => (
-            <li key={ `user-${ index }` }>{ user.name } { user.lastName }</li>
-          ) )
-        }
+        <li><strong>Nombre: </strong>{ user.name }</li>
+        <li><strong>Usuario: </strong>{ user.username }</li>
+        <li><strong>Email: </strong>{ user.email }</li>
+        <li><strong>Web: </strong>{ user.website }</li>
+        <li><strong>Teléfono: </strong>{ user.phone }</li>
       </ul>
+      <TodoList tasks={ tasks } />
     </div>
   );
 

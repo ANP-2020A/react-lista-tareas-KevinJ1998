@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import '../styles/todo-list.css';
 
-const TodoList = () => {
+const TodoList = ( props ) => {
 
+  const propsTasks = props.tasks;
   const [ tasks, setTasks ] = useState( [] );
-  const [ completedTask, setCompletedTask ] = useState( [] );
-  const [ darkMode, setDarkMode ] = useState( false );
-  const [ windowWidth, setWindowWidth ] = useState( window.innerWidth );
+  const [ markCompleted, setMarkCompleted ] = useState( false );
+
+  useEffect( () => {
+    setTasks( () => propsTasks );
+  }, [ propsTasks ] );
 
   useEffect( () => {
     console.log( 'tasks', tasks.length );
@@ -18,33 +21,16 @@ const TodoList = () => {
   }, [ tasks ] );
 
   useEffect( () => {
-    fetch( 'https://jsonplaceholder.typicode.com/users/1' ).then( ( data ) => {
-      return data.json();
-    } ).then( ( json ) => {
-      console.log( 'json', json );
-    } );
-  }, [] );
+    console.log( 'cambio de estado' );
+  }, [ markCompleted ] );
 
-  useEffect( () => {
-    console.log( 'Ejecucion del efecto' );
-    window.addEventListener( 'resize', handleResize );
-
-    return () => {
-      console.log( 'retorno del efecto' );
-      window.removeEventListener( 'resize', handleResize );
-    };
-  } );
-
-  const handleResize = () => {
-    setWindowWidth( window.innerWidth );
-  };
 
   const handleAddTask = () => {
-    const titleTask = document.querySelector( '#titleTask' ).value;
-    const status = 'pending';
+    const title = document.querySelector( '#titleTask' ).value;
+    const completed = false;
     const newTask = {
-      titleTask,
-      status
+      title,
+      completed
     };
     setTasks( ( prevState ) => [
       ...prevState,
@@ -54,12 +40,9 @@ const TodoList = () => {
 
   const handleCompleteTask = ( value ) => {
     const newTasks = tasks;
-    newTasks[ value ].status = 'completed';
-    const compTask = newTasks.filter( ( task, index ) => task.status === 'completed' );
-    setCompletedTask( () =>
-      compTask
-    );
-    handleRemoveTask( value );
+    newTasks[ value ].completed = true;
+    setMarkCompleted( !markCompleted );
+    setTasks( () => newTasks );
   };
 
   const handleRemoveTask = ( value ) => {
@@ -69,43 +52,43 @@ const TodoList = () => {
 
 
   return (
-    <div className={ darkMode
-      ? 'dark-mode'
-      : '' }>
-      <button onClick={ () => setDarkMode( !darkMode ) }>
-        {
-          darkMode
-            ? 'Modo claro'
-            : 'Modo oscuro'
-        }
-      </button>
-      <div>Ancho de la ventana: { windowWidth }</div>
+    <div>
       <div>
-        <h1>Lista de tareas pendientes({ tasks.length })</h1>
-        <label htmlFor='titleTask'>Título tarea</label>
+        <label htmlFor='titleTask'>Tarea</label>
         <input type='text' id='titleTask' />
         <button onClick={ handleAddTask }>Añadir tarea</button>
+        <h1>Lista de tareas ({ tasks.length })</h1>
       </div>
-      <ul>
+      <table>
+        <tbody>
+        <tr>
+          <td><strong>Nombre</strong></td>
+          <td><strong>Estado</strong></td>
+          <td><strong>Eliminar</strong></td>
+        </tr>
         {
           tasks.map( ( task, index ) => (
-            <li key={ `task-${ index }` }>{ task.titleTask }
-              <button onClick={ () => handleRemoveTask( index ) }>Eliminar</button>
-              <button onClick={ () => handleCompleteTask( index ) }>Completada</button>
-            </li>
+            <tr key={ `task-${ index }` }>
+              <td>{ task.title }</td>
+              <td>
+                <button style={ {
+                  backgroundColor: task.completed
+                    ? '#7fffd4'
+                    : '#ff7f50'
+                } }
+                        onClick={ () => {handleCompleteTask( index );} }
+                        disabled={ task.completed }>{ task.completed
+                  ? 'Completada'
+                  : 'Marcar como completada' }</button>
+              </td>
+              <td>
+                <button onClick={ () => {handleRemoveTask( index );} }>Eliminar</button>
+              </td>
+            </tr>
           ) )
         }
-      </ul>
-      <div>
-        <h1>Lista de tareas completadas ({ completedTask.length })</h1>
-        <ul>
-          {
-            completedTask.map( ( task, index ) => (
-              <li key={ `taskc-${ index }` }>{ task.titleTask }</li>
-            ) )
-          }
-        </ul>
-      </div>
+        </tbody>
+      </table>
     </div>
   );
 
