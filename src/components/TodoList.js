@@ -5,7 +5,6 @@ const TodoList = ( props ) => {
 
   const propsTasks = props.tasks;
   const [ tasks, setTasks ] = useState( [] );
-  const [ markCompleted, setMarkCompleted ] = useState( false );
 
   useEffect( () => {
     setTasks( () => propsTasks );
@@ -19,10 +18,6 @@ const TodoList = ( props ) => {
       document.title = 'No tienes tareas pendientes';
     }
   }, [ tasks ] );
-
-  useEffect( () => {
-    console.log( 'cambio de estado' );
-  }, [ markCompleted ] );
 
 
   const handleAddTask = () => {
@@ -39,9 +34,8 @@ const TodoList = ( props ) => {
   };
 
   const handleCompleteTask = ( value ) => {
-    const newTasks = tasks;
+    const newTasks = [ ...tasks ];
     newTasks[ value ].completed = true;
-    setMarkCompleted( !markCompleted );
     setTasks( () => newTasks );
   };
 
